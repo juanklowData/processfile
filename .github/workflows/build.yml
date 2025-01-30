@@ -1,23 +1,30 @@
 name: Build executables
 
-on: [push]
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
 
 jobs:
   build-windows:
     runs-on: windows-latest
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
     - name: Set up Python
-      uses: actions/setup-python@v2
+      uses: actions/setup-python@v3
       with:
         python-version: '3.9'
     - name: Install dependencies
       run: |
-        pip install pyinstaller PyQt6 pandas chardet
+        python -m pip install --upgrade pip
+        pip install pyinstaller
+        pip install PyQt6 pandas chardet
     - name: Build executable
-      run: pyinstaller --name="PhoneFilter" --onefile --windowed ProcessCsv.py
-    - name: Upload artifact
-      uses: actions/upload-artifact@v2
+      run: |
+        pyinstaller --name="PhoneFilter" --onefile --windowed ProcessCsv.py
+    - name: Upload Windows Build
+      uses: actions/upload-artifact@v3
       with:
         name: PhoneFilter-Windows
         path: dist/PhoneFilter.exe
@@ -25,33 +32,21 @@ jobs:
   build-macos:
     runs-on: macos-latest
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
     - name: Set up Python
-      uses: actions/setup-python@v2
+      uses: actions/setup-python@v3
       with:
         python-version: '3.9'
     - name: Install dependencies
       run: |
-        pip install py2app PyQt6 pandas chardet
-    - name: Create setup.py
-      run: |
-        echo 'from setuptools import setup
-        APP = ["ProcessCsv.py"]
-        DATA_FILES = []
-        OPTIONS = {
-            "argv_emulation": True,
-            "packages": ["PyQt6", "pandas", "chardet"],
-        }
-        setup(
-            app=APP,
-            data_files=DATA_FILES,
-            options={"py2app": OPTIONS},
-            setup_requires=["py2app"],
-        )' > setup.py
+        python -m pip install --upgrade pip
+        pip install py2app
+        pip install PyQt6 pandas chardet
     - name: Build app
-      run: python setup.py py2app
-    - name: Upload artifact
-      uses: actions/upload-artifact@v2
+      run: |
+        python setup.py py2app
+    - name: Upload macOS Build
+      uses: actions/upload-artifact@v3
       with:
         name: PhoneFilter-MacOS
         path: dist/PhoneFilter.app
