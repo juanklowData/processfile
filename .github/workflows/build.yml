@@ -42,12 +42,44 @@ jobs:
         python -m pip install --upgrade pip
         pip install pyinstaller
         pip install PyQt6 pandas chardet
+    - name: Create Info.plist
+      run: |
+        echo '<?xml version="1.0" encoding="UTF-8"?>
+        <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+        <plist version="1.0">
+        <dict>
+          <key>CFBundleExecutable</key>
+          <string>PhoneFilter</string>
+          <key>CFBundleIconFile</key>
+          <string>icon.icns</string>
+          <key>CFBundleIdentifier</key>
+          <string>com.phonefilter.app</string>
+          <key>CFBundleName</key>
+          <string>PhoneFilter</string>
+          <key>CFBundlePackageType</key>
+          <string>APPL</string>
+          <key>CFBundleShortVersionString</key>
+          <string>1.0.0</string>
+          <key>LSMinimumSystemVersion</key>
+          <string>10.15</string>
+          <key>NSHighResolutionCapable</key>
+          <true/>
+        </dict>
+        </plist>' > Info.plist
     - name: Build executable
       run: |
-        pyinstaller --name="PhoneFilter" --onefile --windowed --clean ProcessCsv.py
+        pyinstaller --name="PhoneFilter" \
+          --onefile \
+          --windowed \
+          --clean \
+          --target-architecture universal2 \
+          --osx-bundle-identifier="com.phonefilter.app" \
+          ProcessCsv.py
     - name: Create app bundle
       run: |
         mkdir -p "dist/PhoneFilter.app/Contents/MacOS"
+        mkdir -p "dist/PhoneFilter.app/Contents/Resources"
+        cp Info.plist "dist/PhoneFilter.app/Contents/"
         mv "dist/PhoneFilter" "dist/PhoneFilter.app/Contents/MacOS/"
         chmod +x "dist/PhoneFilter.app/Contents/MacOS/PhoneFilter"
     - name: Upload macOS Build
