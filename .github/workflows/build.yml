@@ -10,9 +10,9 @@ jobs:
   build-windows:
     runs-on: windows-latest
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
     - name: Set up Python
-      uses: actions/setup-python@v3
+      uses: actions/setup-python@v4
       with:
         python-version: '3.9'
     - name: Install dependencies
@@ -24,7 +24,7 @@ jobs:
       run: |
         pyinstaller --name="PhoneFilter" --onefile --windowed ProcessCsv.py
     - name: Upload Windows Build
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: PhoneFilter-Windows
         path: dist/PhoneFilter.exe
@@ -32,9 +32,9 @@ jobs:
   build-macos:
     runs-on: macos-latest
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
     - name: Set up Python
-      uses: actions/setup-python@v3
+      uses: actions/setup-python@v4
       with:
         python-version: '3.9'
     - name: Install dependencies
@@ -42,11 +42,25 @@ jobs:
         python -m pip install --upgrade pip
         pip install py2app
         pip install PyQt6 pandas chardet
-    - name: Build app
+    - name: Create setup.py
       run: |
-        python setup.py py2app
+        echo 'from setuptools import setup
+        APP = ["ProcessCsv.py"]
+        DATA_FILES = []
+        OPTIONS = {
+            "argv_emulation": True,
+            "packages": ["PyQt6", "pandas", "chardet"],
+        }
+        setup(
+            app=APP,
+            data_files=DATA_FILES,
+            options={"py2app": OPTIONS},
+            setup_requires=["py2app"],
+        )' > setup.py
+    - name: Build app
+      run: python setup.py py2app
     - name: Upload macOS Build
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: PhoneFilter-MacOS
         path: dist/PhoneFilter.app
