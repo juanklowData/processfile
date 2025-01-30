@@ -44,10 +44,11 @@ jobs:
         pip install PyQt6 pandas chardet
     - name: Build executable
       run: |
-        pyinstaller --name="PhoneFilter" --onefile --windowed --target-arch universal2 ProcessCsv.py
-        chmod +x dist/PhoneFilter
+        pyinstaller --name="PhoneFilter" --onefile --windowed --clean ProcessCsv.py
+    - name: Create app bundle
+      run: |
         mkdir -p "dist/PhoneFilter.app/Contents/MacOS"
-        cp dist/PhoneFilter "dist/PhoneFilter.app/Contents/MacOS/"
+        mv "dist/PhoneFilter" "dist/PhoneFilter.app/Contents/MacOS/"
         chmod +x "dist/PhoneFilter.app/Contents/MacOS/PhoneFilter"
     - name: Upload macOS Build
       uses: actions/upload-artifact@v4
